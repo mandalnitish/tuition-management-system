@@ -26,38 +26,150 @@ router.get("/", async (req, res) => {
 // POST /api/payments
 router.post("/", async (req, res) => {
   const conn = await pool.getConnection();
+
   try {
-    const { studentId, month, year, amount, paymentDate, paymentMode, remarks } = req.body;
+    const {
+      studentId,
+      month,
+      year,
+      amount,
+      paymentDate,
+      paymentMode,
+      remarks,
+    } = req.body;
+
     if (!studentId || !month || !year || !amount || !paymentDate) {
       conn.release();
-      return res.status(400).json({ message: "Student, month, year, amount and payment date are required." });
+      return res.status(400).json({
+        message: "Student, month, year, amount and payment date are required.",
+      });
     }
 
     await conn.beginTransaction();
-    const [[{ cnt }]] = await conn.query("SELECT COUNT(*) AS cnt FROM fee_payments WHERE year = ?", [year]);
-    const receiptNo = `${year}${String(cnt + 1).padStart(3, "0")}`;
 
-    const [result] = await conn.query(
-      `INSERT INTO fee_payments (student_id, month, year, amount, payment_date, payment_mode, receipt_no, remarks)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [studentId, month, year, amount, paymentDate, paymentMode || "Cash", receiptNo, remarks || null]
+    // Check if payment already exists
+    const [existing] = await conn.query(
+      `SELECT id
+       FROM fee_payments
+       WHERE student_id = ? AND month = ? AND year = ?`,
+      [studentId, month, year]
     );
+
+    if (existing.length > 0) {
+      // Add amount to existing payment
+      await conn.query(
+        `UPDATE fee_payments
+         SET amount = amount + ?,
+             payment_date = ?,
+             payment_mode = ?,
+             remarks = ?
+         WHERE id = ?`,
+        [
+          amount,
+          paymentDate,
+          paymentMode || "Cash",
+          remarks || null,
+          existing[0].id,
+        ]
+      );
+
+      await conn.commit();
+
+      const [rows] = await conn.query(
+        `SELECT p.*, s.name AS student_name,
+                s.class AS student_class,
+                s.mobile AS student_mobile
+         FROM fee_payments p
+         JOIN students s ON s.id = p.student_id
+         WHERE p.id = ?`,
+        [existing[0].id]
+      );
+
+      return res.json(rows[0]);
+    }
+
+    // Insert new payment
+    const [result] = await conn.query(
+      `INSERT INTO fee_payments
+      (student_id, month, year, amount, payment_date, payment_mode, remarks)
+      VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        studentId,
+        month,
+        year,
+        amount,
+        paymentDate,
+        paymentMode || "Cash",
+        remarks || null,
+      ]
+    );
+
+    // Generate receipt number
+    const receiptNo = `${year}${String(result.insertId).padStart(6, "0")}`;
+
+    await conn.query(
+      `UPDATE fee_payments
+       SET receipt_no = ?
+       WHERE id = ?`,
+      [receiptNo, result.insertId]
+    );
+
     await conn.commit();
+
+    const [rows] = await conn.query(
+      `SELECT p.*, s.name AS student_name,
+              s.class AS student_class,
+              s.mobile AS student_mobile
+       FROM fee_payments p
+       JOIN students s ON s.id = p.student_id
+       WHERE p.id = ?`,
+      [result.insertId]
+    );
+
+    res.status(201).json(rows[0]);
+  } catch (err) {
+    await conn.rollback();
+
+    res.status(500).json({
+      message: "Could not record payment.",
+      error: err.message,
+    });
+  } finally {
+    conn.release();
+  }
+});
+
+// PUT /api/payments/:id — update an existing payment (amount, date, mode, remarks,
+// and optionally student/month/year if you really need to move a payment).
+router.put("/:id", async (req, res) => {
+  try {
+    const { studentId, month, year, amount, paymentDate, paymentMode, remarks } = req.body;
+    if (!studentId || !month || !year || !amount || !paymentDate) {
+  return res.status(400).json({
+    message: "Student, month, year, amount and payment date are required.",
+  });
+}
+
+    const [existing] = await pool.query("SELECT * FROM fee_payments WHERE id = ?", [req.params.id]);
+    if (!existing.length) return res.status(404).json({ message: "Payment not found." });
+
+    await pool.query(
+      `UPDATE fee_payments SET student_id=?, month=?, year=?, amount=?, payment_date=?, payment_mode=?, remarks=?
+       WHERE id=?`,
+      [studentId, month, year, amount, paymentDate, paymentMode || "Cash", remarks || null, req.params.id]
+    );
 
     const [rows] = await pool.query(
       `SELECT p.*, s.name AS student_name, s.class AS student_class, s.mobile AS student_mobile
        FROM fee_payments p JOIN students s ON s.id = p.student_id WHERE p.id = ?`,
-      [result.insertId]
+      [req.params.id]
     );
-    res.status(201).json(rows[0]);
+    res.json(rows[0]);
   } catch (err) {
-    await conn.rollback();
     if (err.code === "ER_DUP_ENTRY") {
       return res.status(409).json({ message: "A payment for this student and month already exists." });
     }
-    res.status(500).json({ message: "Could not record payment.", error: err.message });
-  } finally {
-    conn.release();
+    res.status(500).json({ message: "Could not update payment.", error: err.message });
   }
 });
 

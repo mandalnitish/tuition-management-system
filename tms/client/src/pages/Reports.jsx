@@ -49,13 +49,71 @@ export default function Reports() {
   let rows = [];
   let title = "";
   if (result) {
-    if (tab === "daily") { title = `Daily Report — ${date}`; rows = result.payments.map((p) => ({ Student: p.student_name, Month: p.month, Year: p.year, Amount: p.amount, Mode: p.payment_mode, Receipt: p.receipt_no })); }
-    else if (tab === "monthly") { title = `Monthly Report — ${month} ${year}`; rows = result.payments.map((p) => ({ Student: p.student_name, Amount: p.amount, Date: p.payment_date, Mode: p.payment_mode, Receipt: p.receipt_no })); }
-    else if (tab === "yearly") { title = `Yearly Report — ${year}`; rows = result.data.map((d) => ({ Month: d.month, Collection: d.amount })); }
-    else if (tab === "student") { title = `Student Report — ${result.student?.name || ""}`; rows = result.payments.map((p) => ({ Month: p.month, Year: p.year, Amount: p.amount, Date: p.payment_date, Mode: p.payment_mode, Receipt: p.receipt_no })); }
-    else if (tab === "pending") { title = `Pending Fees — ${result.month} ${result.year}`; rows = result.students.map((s) => ({ Student: s.name, Class: s.class, Mobile: s.mobile, "Amount Due": s.monthly_fee })); }
-    else if (tab === "search") { title = "Search Results"; rows = result.map((p) => ({ Student: p.student_name, Class: p.student_class, Month: p.month, Year: p.year, Amount: p.amount, Receipt: p.receipt_no })); }
+  if (tab === "daily") {
+    title = `Daily Report — ${date}`;
+    rows = (result.payments || []).map((p) => ({
+      Student: p.student_name,
+      Month: p.month,
+      Year: p.year,
+      Amount: p.amount,
+      Mode: p.payment_mode,
+      Receipt: p.receipt_no,
+    }));
   }
+
+  else if (tab === "monthly") {
+    title = `Monthly Report — ${month} ${year}`;
+    rows = (result.payments || []).map((p) => ({
+      Student: p.student_name,
+      Amount: p.amount,
+      Date: p.payment_date,
+      Mode: p.payment_mode,
+      Receipt: p.receipt_no,
+    }));
+  }
+
+  else if (tab === "yearly") {
+    title = `Yearly Report — ${year}`;
+    rows = (result.data || []).map((d) => ({
+      Month: d.month,
+      Collection: d.amount,
+    }));
+  }
+
+  else if (tab === "student") {
+    title = `Student Report — ${result.student?.name || ""}`;
+    rows = (result.payments || []).map((p) => ({
+      Month: p.month,
+      Year: p.year,
+      Amount: p.amount,
+      Date: p.payment_date,
+      Mode: p.payment_mode,
+      Receipt: p.receipt_no,
+    }));
+  }
+
+  else if (tab === "pending") {
+    title = `Pending Fees — ${result.month || ""} ${result.year || ""}`;
+    rows = (result.students || []).map((s) => ({
+      Student: s.name,
+      Class: s.class,
+      Mobile: s.mobile,
+      "Amount Due": s.monthly_fee,
+    }));
+  }
+
+  else if (tab === "search") {
+    title = "Search Results";
+    rows = (Array.isArray(result) ? result : []).map((p) => ({
+      Student: p.student_name,
+      Class: p.student_class,
+      Month: p.month,
+      Year: p.year,
+      Amount: p.amount,
+      Receipt: p.receipt_no,
+    }));
+  }
+}
 
   return (
     <div>

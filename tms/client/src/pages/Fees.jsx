@@ -1,27 +1,41 @@
 import React, { useEffect, useState } from "react";
-import { Plus, Trash2, Receipt as ReceiptIcon } from "lucide-react";
+import { Plus, Trash2, Pencil, Receipt as ReceiptIcon, QrCode } from "lucide-react";
 import api from "../services/api";
 import { Field, Input, Select, TextArea, Modal, IconBtn } from "../components/UI";
 import ReceiptModal from "../components/Receipt";
+import UpiPayModal from "../components/UpiPay";
 import { MONTHS, PAYMENT_MODES, inr, todayISO } from "../utils/format";
 
-function PaymentForm({ students, prefill, onSaved, onClose }) {
+function PaymentForm({ students, prefill, editing, settings, onSaved, onClose }) {
   const now = new Date();
-  const [form, setForm] = useState({
-    studentId: prefill?.studentId || "",
-    month: prefill?.month || MONTHS[now.getMonth()],
-    year: prefill?.year || now.getFullYear(),
-    amount: prefill?.amount || "",
-    paymentDate: todayISO(),
-    paymentMode: "Cash",
-    remarks: "",
-  });
+  const [form, setForm] = useState(
+    editing
+      ? {
+          studentId: editing.student_id,
+          month: editing.month,
+          year: editing.year,
+          amount: editing.amount,
+          paymentDate: editing.payment_date,
+          paymentMode: editing.payment_mode,
+          remarks: editing.remarks || "",
+        }
+      : {
+          studentId: prefill?.studentId || "",
+          month: prefill?.month || MONTHS[now.getMonth()],
+          year: prefill?.year || now.getFullYear(),
+          amount: prefill?.amount || "",
+          paymentDate: todayISO(),
+          paymentMode: "Cash",
+          remarks: "",
+        }
+  );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [showUpi, setShowUpi] = useState(false);
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
   useEffect(() => {
-    if (form.studentId && !form.amount) {
+    if (!editing && form.studentId && !form.amount) {
       const st = students.find((s) => s.id === Number(form.studentId));
       if (st) set("amount", st.monthly_fee);
     }
@@ -34,7 +48,8 @@ function PaymentForm({ students, prefill, onSaved, onClose }) {
     setBusy(true);
     setError("");
     try {
-      await api.post("/payments", form);
+      if (editing) await api.put(`/payments/${editing.id}`, form);
+      else await api.post("/payments", form);
       onSaved();
     } catch (err) {
       setError(err.response?.data?.message || "Could not save payment.");
@@ -44,18 +59,18 @@ function PaymentForm({ students, prefill, onSaved, onClose }) {
   };
 
   return (
-    <Modal title="Record Fee Payment" onClose={onClose}>
+    <Modal title={editing ? "Edit Fee Payment" : "Record Fee Payment"} onClose={onClose}>
       <form onSubmit={submit} className="tms-form-grid">
         <Field label="Student" required>
-          <Select value={form.studentId} onChange={(e) => set("studentId", e.target.value)}>
+          <Select value={form.studentId} onChange={(e) => set("studentId", e.target.value)} disabled={!!editing}>
             <option value="">Select student</option>
             {students.map((s) => <option key={s.id} value={s.id}>{s.name} · {s.class}</option>)}
           </Select>
         </Field>
         <Field label="Month" required>
-          <Select value={form.month} onChange={(e) => set("month", e.target.value)}>{MONTHS.map((m) => <option key={m}>{m}</option>)}</Select>
+          <Select value={form.month} onChange={(e) => set("month", e.target.value)} disabled={!!editing}>{MONTHS.map((m) => <option key={m}>{m}</option>)}</Select>
         </Field>
-        <Field label="Year" required><Input type="number" value={form.year} onChange={(e) => set("year", e.target.value)} /></Field>
+        <Field label="Year" required><Input type="number" value={form.year} onChange={(e) => set("year", e.target.value)} disabled={!!editing} /></Field>
         <Field label="Amount (₹)" required><Input type="number" min="0" value={form.amount} onChange={(e) => set("amount", e.target.value)} /></Field>
         <Field label="Payment Date" required><Input type="date" value={form.paymentDate} onChange={(e) => set("paymentDate", e.target.value)} /></Field>
         <Field label="Payment Mode">
@@ -64,10 +79,24 @@ function PaymentForm({ students, prefill, onSaved, onClose }) {
         <Field label="Remarks"><TextArea rows={2} value={form.remarks} onChange={(e) => set("remarks", e.target.value)} /></Field>
         {error && <div className="tms-error" style={{ gridColumn: "1 / -1" }}>{error}</div>}
         <div className="tms-form-actions">
+          {!editing && (
+            <button type="button" className="tms-btn-ghost" onClick={() => setShowUpi(true)} disabled={!form.studentId}>
+              <QrCode size={15} /> UPI QR
+            </button>
+          )}
           <button type="button" className="tms-btn-ghost" onClick={onClose}>Cancel</button>
-          <button type="submit" className="tms-btn-primary" disabled={busy}>{busy ? "Saving..." : "Save Payment"}</button>
+          <button type="submit" className="tms-btn-primary" disabled={busy}>{busy ? "Saving..." : editing ? "Update Payment" : "Save Payment"}</button>
         </div>
       </form>
+      {showUpi && (
+        <UpiPayModal
+          settings={settings}
+          student={students.find((s) => s.id === Number(form.studentId))}
+          defaultAmount={form.amount}
+          defaultNote={`Fee - ${students.find((s) => s.id === Number(form.studentId))?.name || ""} - ${form.month} ${form.year}`}
+          onClose={() => setShowUpi(false)}
+        />
+      )}
     </Modal>
   );
 }
@@ -80,6 +109,7 @@ export default function Fees({ notify }) {
   const [year, setYear] = useState(now.getFullYear());
   const [showForm, setShowForm] = useState(false);
   const [prefill, setPrefill] = useState(null);
+  const [editingPayment, setEditingPayment] = useState(null);
   const [receiptFor, setReceiptFor] = useState(null);
 
   const load = () => {
@@ -87,7 +117,7 @@ export default function Fees({ notify }) {
     api.get("/payments", { params: { year } }).then((res) => setPayments(res.data));
     api.get("/settings").then((res) => setSettings(res.data));
   };
-  useEffect(() => { load(); }, [year]);
+  useEffect(load, [year]);
 
   const statusFor = (studentId, month) => payments.find((p) => p.student_id === studentId && p.month === month);
 
@@ -98,7 +128,13 @@ export default function Fees({ notify }) {
     load();
   };
 
-  const recentPayments = [...payments].sort((a, b) => b.payment_date.localeCompare(a.payment_date)).slice(0, 8);
+  const closeForm = () => {
+    setShowForm(false);
+    setPrefill(null);
+    setEditingPayment(null);
+  };
+
+  const recentPayments = [...payments].sort((a, b) => b.payment_date.localeCompare(a.payment_date));
 
   return (
     <div>
@@ -108,7 +144,7 @@ export default function Fees({ notify }) {
           <Select value={year} onChange={(e) => setYear(Number(e.target.value))} style={{ width: 110 }}>
             {[now.getFullYear() - 1, now.getFullYear(), now.getFullYear() + 1].map((y) => <option key={y} value={y}>{y}</option>)}
           </Select>
-          <button className="tms-btn-primary" onClick={() => { setPrefill(null); setShowForm(true); }}><Plus size={16} /> Record Payment</button>
+          <button className="tms-btn-primary" onClick={() => { setPrefill(null); setEditingPayment(null); setShowForm(true); }}><Plus size={16} /> Record Payment</button>
         </div>
       </div>
 
@@ -126,8 +162,8 @@ export default function Fees({ notify }) {
                     <td key={m}>
                       <button
                         className={"tms-cell-badge " + (p ? "tms-cell-paid" : "tms-cell-pending")}
-                        onClick={() => p ? setReceiptFor(p) : (setPrefill({ studentId: s.id, month: m, year, amount: s.monthly_fee }), setShowForm(true))}
-                        title={p ? `Paid ${inr(p.amount)} on ${p.payment_date}` : "Click to record payment"}
+                        onClick={() => p ? setReceiptFor(p) : (setPrefill({ studentId: s.id, month: m, year, amount: s.monthly_fee }), setEditingPayment(null), setShowForm(true))}
+                        title={p ? `Paid ${inr(p.amount)} on ${p.payment_date} — click to view receipt` : "Click to record payment"}
                       >
                         {p ? inr(p.amount) : "—"}
                       </button>
@@ -140,8 +176,8 @@ export default function Fees({ notify }) {
         </table>
       </div>
 
-      <h4 className="tms-section-title">Recent Payments</h4>
-      <div className="tms-card tms-table-wrap">
+      <div className="tms-card tms-table-wrap tms-scroll-panel">
+        <h4 className="tms-section-title">Recent Payments</h4>
         <table className="tms-table">
           <thead><tr><th>Student</th><th>Month</th><th>Amount</th><th>Date</th><th>Mode</th><th>Receipt</th><th>Actions</th></tr></thead>
           <tbody>
@@ -153,6 +189,7 @@ export default function Fees({ notify }) {
                 <td>
                   <div className="tms-row-actions">
                     <IconBtn title="Receipt" onClick={() => setReceiptFor(p)}><ReceiptIcon size={15} /></IconBtn>
+                    <IconBtn title="Edit" onClick={() => { setEditingPayment(p); setPrefill(null); setShowForm(true); }}><Pencil size={15} /></IconBtn>
                     <IconBtn title="Delete" danger onClick={() => removePayment(p.id)}><Trash2 size={15} /></IconBtn>
                   </div>
                 </td>
@@ -166,8 +203,10 @@ export default function Fees({ notify }) {
         <PaymentForm
           students={students}
           prefill={prefill}
-          onSaved={() => { setShowForm(false); setPrefill(null); load(); notify("Payment recorded."); }}
-          onClose={() => { setShowForm(false); setPrefill(null); }}
+          editing={editingPayment}
+          settings={settings}
+          onSaved={() => { closeForm(); load(); notify(editingPayment ? "Payment updated." : "Payment recorded."); }}
+          onClose={closeForm}
         />
       )}
       {receiptFor && <ReceiptModal payment={receiptFor} settings={settings} onClose={() => setReceiptFor(null)} />}

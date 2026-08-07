@@ -14,6 +14,8 @@ import { Toast } from "./components/UI";
 import { useAuth } from "./context/AuthContext";
 import api from "./services/api";
 
+import UpiPay from "./components/UpiPay";
+
 function Shell({ children }) {
   const [theme, setTheme] = useState(localStorage.getItem("tms_theme") || "light");
   const [instituteName, setInstituteName] = useState("");

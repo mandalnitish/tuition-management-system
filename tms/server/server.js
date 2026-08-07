@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+const pool = require("./config/db");
 
 const app = express();
 
@@ -21,6 +22,26 @@ app.use("/api/dashboard", require("./routes/dashboard"));
 app.use("/api/reports", require("./routes/reports"));
 
 app.get("/api/health", (req, res) => res.json({ status: "ok", time: new Date().toISOString() }));
+app.get("/test-db", async (req, res) => {
+  try {
+    const [[students]] = await pool.query(
+      "SELECT COUNT(*) AS total FROM students"
+    );
+
+    const [[payments]] = await pool.query(
+      "SELECT COUNT(*) AS total FROM fee_payments"
+    );
+
+    res.json({
+      students: students.total,
+      payments: payments.total,
+    });
+  } catch (err) {
+    res.status(500).json({
+      error: err.message,
+    });
+  }
+});
 
 app.use((req, res) => res.status(404).json({ message: "Route not found." }));
 app.use((err, req, res, next) => {

@@ -6,8 +6,26 @@ const pool = require("./config/db");
 
 const app = express();
 
-const allowedOrigins = (process.env.CLIENT_ORIGIN || "http://localhost:5173").split(",");
-app.use(cors({ origin: allowedOrigins }));
+const allowedOrigins = (
+  process.env.CLIENT_ORIGIN || "http://localhost:5173"
+)
+  .split(",")
+  .map(origin => origin.trim());
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests without Origin (Postman, health checks, etc.)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));

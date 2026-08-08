@@ -185,15 +185,73 @@ html.dark .tms-receipt { background:#20242f; color:#EDEFF4; }
 
 /* Mobile */
 @media (max-width: 640px) {
-  .tms-main { padding: 14px; }
+  .tms-main { padding: 14px; padding-bottom: 76px; }
 
-  /* collapsible sidebar becomes a horizontally-scrollable top bar */
+  /* sidebar becomes: slim top bar (brand + theme/logout icons) + fixed bottom tab bar (nav) */
   .tms-shell { flex-direction: column; }
-  .tms-sidebar, .tms-sidebar-collapsed { width: 100%; flex-direction: row; align-items: center; }
-  .tms-sidebar-top { padding: 10px 12px; border-bottom: none; border-right: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; }
-  .tms-nav { flex-direction: row; padding: 8px 10px; gap: 4px; overflow-x: auto; -webkit-overflow-scrolling: touch; flex: none; }
-  .tms-nav-item { flex-shrink: 0; padding: 8px 12px; font-size: 12.5px; }
-  .tms-sidebar-bottom { border-top: none; border-left: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; }
+  .tms-sidebar, .tms-sidebar-collapsed {
+    width: 100%;
+    height: auto;
+    position: relative;
+    flex-direction: column;
+  }
+  .tms-sidebar-top {
+    padding: 10px 56px 10px 14px;
+    border-bottom: none;
+    position: relative;
+  }
+  .tms-sidebar-brand span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 44vw;
+    display: inline-block;
+  }
+  .tms-sidebar-toggle { display: none; }
+
+  /* theme toggle + logout: icon-only buttons, pinned top-right */
+  .tms-sidebar-bottom {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    flex-direction: row;
+    gap: 2px;
+    padding: 0;
+    border-top: none;
+    width: auto;
+  }
+  .tms-sidebar-bottom .tms-nav-item {
+    padding: 8px;
+    border-radius: 8px;
+  }
+  .tms-sidebar-bottom .tms-nav-item span { display: none; }
+
+  /* main nav: fixed bottom tab bar */
+  .tms-nav {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    flex-direction: row;
+    padding: 4px 2px;
+    gap: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    background: var(--ink);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    z-index: 40;
+    justify-content: space-between;
+  }
+  .tms-nav-item {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    flex-shrink: 0;
+    min-width: 54px;
+    padding: 6px 4px;
+    font-size: 9.5px;
+    text-align: center;
+    white-space: nowrap;
+    border-radius: 8px;
+  }
 
   /* page header: stack title and actions, actions go full width */
   .tms-page-head { flex-direction: column; align-items: stretch; }

@@ -170,6 +170,10 @@ html.dark .tms-receipt { background:#20242f; color:#EDEFF4; }
   .tms-modal { box-shadow:none; max-height:none; }
 }
 
+/* fix: .tms-login-mark (44px) is declared after .tms-sidebar-mark (30px) in this file,
+   so on the sidebar it was winning the cascade and blowing up the logo. Re-assert here. */
+.tms-sidebar-top .tms-sidebar-mark { width: 30px; height: 30px; }
+
 /* ================================================================== */
 /* ============ RESPONSIVE: TABLET & MOBILE (added) ================= */
 /* ================================================================== */
@@ -196,14 +200,25 @@ html.dark .tms-receipt { background:#20242f; color:#EDEFF4; }
     flex-direction: column;
   }
   .tms-sidebar-top {
-    padding: 10px 56px 10px 14px;
+    padding: 8px 50px 8px 12px;
     border-bottom: none;
     position: relative;
+    min-height: 0;
+  }
+  .tms-sidebar-mark {
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 7px;
+    flex-shrink: 0;
+  }
+  .tms-sidebar-brand {
+    gap: 8px;
+    font-size: 13.5px;
   }
   .tms-sidebar-brand span {
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 44vw;
+    max-width: 56vw;
     display: inline-block;
   }
   .tms-sidebar-toggle { display: none; }

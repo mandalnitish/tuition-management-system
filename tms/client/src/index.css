@@ -200,8 +200,8 @@ html.dark .tms-receipt { background:#20242f; color:#EDEFF4; }
     flex-direction: column;
   }
   .tms-sidebar-top {
-    padding: 8px 78px 8px 12px;
-    border-bottom: none;
+    padding: 6px 78px 6px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
     position: relative;
     min-height: 0;
   }

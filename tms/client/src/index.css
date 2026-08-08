@@ -192,14 +192,19 @@ html.dark .tms-receipt { background:#20242f; color:#EDEFF4; }
   .tms-main { padding: 14px; padding-bottom: 76px; }
 
   /* sidebar becomes: slim top bar (brand + theme/logout icons) + fixed bottom tab bar (nav) */
-  .tms-shell { flex-direction: column; }
+  .tms-shell { flex-direction: column !important; }
   .tms-sidebar, .tms-sidebar-collapsed {
-    width: 100%;
+    width: 100% !important;
+    max-width: 100% !important;
     height: auto;
     position: relative;
     flex-direction: column;
+    flex-shrink: 0;
   }
   .tms-sidebar-top {
+    display: flex;
+    width: 100%;
+    box-sizing: border-box;
     padding: 6px 78px 6px 12px;
     border-bottom: 1px solid rgba(255,255,255,0.08);
     position: relative;

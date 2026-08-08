@@ -200,7 +200,7 @@ html.dark .tms-receipt { background:#20242f; color:#EDEFF4; }
     flex-direction: column;
   }
   .tms-sidebar-top {
-    padding: 8px 50px 8px 12px;
+    padding: 8px 78px 8px 12px;
     border-bottom: none;
     position: relative;
     min-height: 0;
@@ -218,7 +218,7 @@ html.dark .tms-receipt { background:#20242f; color:#EDEFF4; }
   .tms-sidebar-brand span {
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 56vw;
+    max-width: calc(100vw - 140px);
     display: inline-block;
   }
   .tms-sidebar-toggle { display: none; }
@@ -227,15 +227,15 @@ html.dark .tms-receipt { background:#20242f; color:#EDEFF4; }
   .tms-sidebar-bottom {
     position: absolute;
     top: 6px;
-    right: 8px;
+    right: 6px;
     flex-direction: row;
-    gap: 2px;
+    gap: 0;
     padding: 0;
     border-top: none;
     width: auto;
   }
   .tms-sidebar-bottom .tms-nav-item {
-    padding: 8px;
+    padding: 6px;
     border-radius: 8px;
   }
   .tms-sidebar-bottom .tms-nav-item span { display: none; }

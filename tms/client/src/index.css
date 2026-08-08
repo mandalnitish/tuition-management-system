@@ -237,6 +237,8 @@ html.dark .tms-receipt { background:#20242f; color:#EDEFF4; }
   .tms-sidebar-bottom .tms-nav-item {
     padding: 6px;
     border-radius: 8px;
+    min-width: auto;
+    flex-direction: row;
   }
   .tms-sidebar-bottom .tms-nav-item span { display: none; }
 

@@ -63,7 +63,7 @@ export default function Dashboard() {
 
       <div className="tms-grid-2" style={{ marginTop: 20 }}>
         <div className="tms-card" style={{ padding: 20 }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+          <div className="tms-chart-head">
             <h4 className="tms-section-title" style={{ marginTop: 0, marginBottom: 0 }}>Monthly Collection — {data.year}</h4>
             <div className="tms-seg">
               {yearOptions.map((y) => (
@@ -93,7 +93,12 @@ export default function Dashboard() {
             <tbody>
               {data.recentPayments.length === 0 && <tr><td colSpan={4} className="tms-empty">No payments yet.</td></tr>}
               {data.recentPayments.map((p) => (
-                <tr key={p.id}><td>{p.student_name}</td><td>{p.month} {p.year}</td><td className="tms-mono">{inr(p.amount)}</td><td>{p.payment_date}</td></tr>
+                <tr key={p.id}>
+                  <td data-label="Student">{p.student_name}</td>
+                  <td data-label="Month">{p.month} {p.year}</td>
+                  <td data-label="Amount" className="tms-mono">{inr(p.amount)}</td>
+                  <td data-label="Date">{p.payment_date}</td>
+                </tr>
               ))}
             </tbody>
           </table>
@@ -106,8 +111,9 @@ export default function Dashboard() {
               {data.pendingStudents.length === 0 && <tr><td colSpan={3} className="tms-empty">Everyone is up to date 🎉</td></tr>}
               {data.pendingStudents.map((s) => (
                 <tr key={s.id}>
-                  <td>{s.name}</td><td className="tms-mono">{inr(s.monthly_fee)}</td>
-                  <td><Link className="tms-link" to="/fees">Collect</Link></td>
+                  <td data-label="Student">{s.name}</td>
+                  <td data-label="Amount Due" className="tms-mono">{inr(s.monthly_fee)}</td>
+                  <td data-label=""><Link className="tms-link" to="/fees">Collect</Link></td>
                 </tr>
               ))}
             </tbody>

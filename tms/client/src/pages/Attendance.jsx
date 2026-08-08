@@ -50,9 +50,9 @@ export default function Attendance({ notify }) {
             {students.length === 0 && <tr><td colSpan={3} className="tms-empty">No active students.</td></tr>}
             {students.map((s) => (
               <tr key={s.id}>
-                <td>{s.name}</td>
-                <td>{s.class}</td>
-                <td>
+                <td data-label="Student">{s.name}</td>
+                <td data-label="Class">{s.class}</td>
+                <td data-label="Mark">
                   <div className="tms-seg">
                     {STATUSES.map((st) => (
                       <button key={st} className={"tms-seg-btn " + (markOf(s.id) === st ? "tms-seg-btn-active-" + st.toLowerCase() : "")} onClick={() => mark(s.id, st)}>

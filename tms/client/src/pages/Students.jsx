@@ -144,13 +144,13 @@ export default function Students({ notify }) {
             {students.length === 0 && <tr><td colSpan={7} className="tms-empty">No students found.</td></tr>}
             {students.map((s) => (
               <tr key={s.id}>
-                <td><Avatar name={s.name} photo={photoUrl(s.photo)} /></td>
-                <td><button className="tms-link" onClick={() => setProfileOf(s)}>{s.name}</button></td>
-                <td>{s.class}</td>
-                <td>{s.mobile}</td>
-                <td className="tms-mono">{inr(s.monthly_fee)}</td>
-                <td><Badge status={s.status} /></td>
-                <td>
+                <td data-label=""><Avatar name={s.name} photo={photoUrl(s.photo)} /></td>
+                <td data-label="Name"><button className="tms-link" onClick={() => setProfileOf(s)}>{s.name}</button></td>
+                <td data-label="Class">{s.class}</td>
+                <td data-label="Mobile">{s.mobile}</td>
+                <td data-label="Monthly Fee" className="tms-mono">{inr(s.monthly_fee)}</td>
+                <td data-label="Status"><Badge status={s.status} /></td>
+                <td data-label="Actions">
                   <div className="tms-row-actions">
                     <IconBtn title="View" onClick={() => setProfileOf(s)}><Eye size={15} /></IconBtn>
                     <IconBtn title="Edit" onClick={() => setEditing(s)}><Pencil size={15} /></IconBtn>

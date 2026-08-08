@@ -141,7 +141,7 @@ export default function Reports() {
             <input placeholder="Name, class, mobile, receipt no, month..." value={query} onChange={(e) => setQuery(e.target.value)} />
           </div>
         )}
-        <div style={{ marginLeft: "auto" }} className="tms-row-actions">
+        <div className="tms-toolbar-actions">
           <button className="tms-btn-ghost" onClick={() => exportExcel(rows, title.replace(/\s+/g, "_") + ".xlsx")}><Download size={15} /> Excel</button>
           <button className="tms-btn-ghost" onClick={() => window.print()}><Printer size={15} /> Print</button>
         </div>
@@ -164,7 +164,7 @@ export default function Reports() {
             {rows.map((r, i) => (
               <tr key={i}>
                 {Object.entries(r).map(([k, v], j) => (
-                  <td key={j} className={typeof v === "number" ? "tms-mono" : ""}>
+                  <td key={j} data-label={k} className={typeof v === "number" ? "tms-mono" : ""}>
                     {typeof v === "number" && (k.toLowerCase().includes("amount") || k === "Collection") ? inr(v) : v}
                   </td>
                 ))}

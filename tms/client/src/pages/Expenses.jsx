@@ -79,8 +79,11 @@ export default function Expenses({ notify }) {
               {expenses.length === 0 && <tr><td colSpan={5} className="tms-empty">No expenses recorded.</td></tr>}
               {expenses.map((e) => (
                 <tr key={e.id}>
-                  <td>{e.title}</td><td>{e.category}</td><td className="tms-mono">{inr(e.amount)}</td><td>{e.date}</td>
-                  <td><IconBtn title="Delete" danger onClick={() => remove(e.id)}><Trash2 size={15} /></IconBtn></td>
+                  <td data-label="Title">{e.title}</td>
+                  <td data-label="Category">{e.category}</td>
+                  <td data-label="Amount" className="tms-mono">{inr(e.amount)}</td>
+                  <td data-label="Date">{e.date}</td>
+                  <td data-label=""><IconBtn title="Delete" danger onClick={() => remove(e.id)}><Trash2 size={15} /></IconBtn></td>
                 </tr>
               ))}
             </tbody>

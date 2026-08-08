@@ -184,9 +184,13 @@ export default function Fees({ notify }) {
             {recentPayments.length === 0 && <tr><td colSpan={7} className="tms-empty">No payments yet.</td></tr>}
             {recentPayments.map((p) => (
               <tr key={p.id}>
-                <td>{p.student_name}</td><td>{p.month} {p.year}</td><td className="tms-mono">{inr(p.amount)}</td>
-                <td>{p.payment_date}</td><td>{p.payment_mode}</td><td className="tms-mono">{p.receipt_no}</td>
-                <td>
+                <td data-label="Student">{p.student_name}</td>
+                <td data-label="Month">{p.month} {p.year}</td>
+                <td data-label="Amount" className="tms-mono">{inr(p.amount)}</td>
+                <td data-label="Date">{p.payment_date}</td>
+                <td data-label="Mode">{p.payment_mode}</td>
+                <td data-label="Receipt" className="tms-mono">{p.receipt_no}</td>
+                <td data-label="Actions">
                   <div className="tms-row-actions">
                     <IconBtn title="Receipt" onClick={() => setReceiptFor(p)}><ReceiptIcon size={15} /></IconBtn>
                     <IconBtn title="Edit" onClick={() => { setEditingPayment(p); setPrefill(null); setShowForm(true); }}><Pencil size={15} /></IconBtn>

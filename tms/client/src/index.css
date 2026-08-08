@@ -158,8 +158,136 @@ html.dark .tms-receipt { background:#20242f; color:#EDEFF4; }
 /* toast */
 .tms-toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%); background:var(--ink); color:#fff; padding:10px 18px; border-radius:999px; font-size:13px; z-index:100; box-shadow:0 10px 30px rgba(0,0,0,0.25); }
 
+/* chart card header (Dashboard) */
+.tms-chart-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:4px; flex-wrap:wrap; }
+
+/* toolbar right-aligned action group (Reports) */
+.tms-toolbar-actions { margin-left:auto; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+
 @media print {
   .tms-sidebar, .no-print, .tms-modal-head { display:none !important; }
   .tms-modal-backdrop { position:static; background:none; padding:0; }
   .tms-modal { box-shadow:none; max-height:none; }
+}
+
+/* ================================================================== */
+/* ============ RESPONSIVE: TABLET & MOBILE (added) ================= */
+/* ================================================================== */
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .tms-sidebar:not(.tms-sidebar-collapsed) { width: 190px; }
+  .tms-main { padding: 22px; }
+  .tms-stats-grid { grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); }
+  .tms-modal { max-width: 90vw; }
+  .tms-modal-wide { max-width: 92vw; }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .tms-main { padding: 14px; }
+
+  /* collapsible sidebar becomes a horizontally-scrollable top bar */
+  .tms-shell { flex-direction: column; }
+  .tms-sidebar, .tms-sidebar-collapsed { width: 100%; flex-direction: row; align-items: center; }
+  .tms-sidebar-top { padding: 10px 12px; border-bottom: none; border-right: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; }
+  .tms-nav { flex-direction: row; padding: 8px 10px; gap: 4px; overflow-x: auto; -webkit-overflow-scrolling: touch; flex: none; }
+  .tms-nav-item { flex-shrink: 0; padding: 8px 12px; font-size: 12.5px; }
+  .tms-sidebar-bottom { border-top: none; border-left: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; }
+
+  /* page header: stack title and actions, actions go full width */
+  .tms-page-head { flex-direction: column; align-items: stretch; }
+  .tms-page-head h2 { font-size: 19px; }
+  .tms-page-head > *:not(:first-child) { width: 100%; }
+  .tms-page-head .tms-row-actions { flex-direction: column; align-items: stretch; }
+  .tms-page-head .tms-row-actions > * { width: 100%; justify-content: center; }
+  .tms-page-head button.tms-btn-primary { justify-content: center; width: 100%; }
+
+  /* stat cards: two-up grid instead of auto-fit (avoids 1-per-row clutter) */
+  .tms-stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .tms-stat { padding: 12px; gap: 10px; }
+  .tms-stat-icon { width: 34px; height: 34px; }
+  .tms-stat-value { font-size: 16px; }
+  .tms-stat-label { font-size: 11px; }
+
+  /* toolbars: stack, inputs go full width even when inline-styled */
+  .tms-toolbar { flex-direction: column; align-items: stretch; }
+  .tms-toolbar .tms-search { max-width: none; width: 100%; }
+  .tms-toolbar > input, .tms-toolbar > select,
+  .tms-toolbar > .tms-input { width: 100% !important; max-width: none !important; }
+  .tms-toolbar-actions { margin-left: 0; width: 100%; }
+  .tms-toolbar-actions > * { flex: 1; justify-content: center; }
+
+  .tms-chart-head { flex-direction: column; align-items: stretch; }
+  .tms-chart-head .tms-seg { align-self: flex-start; }
+
+  /* forms */
+  .tms-form-grid { grid-template-columns: 1fr; }
+  .tms-form-actions { flex-direction: column-reverse; }
+  .tms-form-actions button { width: 100%; justify-content: center; }
+  .tms-avatar-preview { width: 48px; height: 48px; font-size: 15px; }
+
+  /* modal becomes a bottom sheet */
+  .tms-modal-backdrop { padding: 0; align-items: flex-end; }
+  .tms-modal, .tms-modal-wide { max-width: 100%; width: 100%; border-radius: 16px 16px 0 0; max-height: 92vh; }
+
+  /* student profile */
+  .tms-profile-head { flex-wrap: wrap; }
+  .tms-profile-stats { grid-template-columns: 1fr 1fr; }
+  .tms-profile-stats .tms-mini-stat:last-child { grid-column: 1 / -1; }
+
+  /* segmented controls & tabs */
+  .tms-seg { flex-wrap: wrap; }
+  .tms-tabs { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .tms-tab { flex-shrink: 0; }
+
+  .tms-receipt { padding: 16px; }
+  .tms-receipt-stamp { right: 10px; top: 58px; font-size: 14px; padding: 3px 9px; }
+  .tms-receipt-actions button { flex: 1; justify-content: center; }
+
+  .tms-login-card { padding: 22px 18px; }
+
+  /* ---- data tables become stacked cards (fee matrix excluded) ---- */
+  .tms-table-wrap { padding: 0; }
+  table.tms-table:not(.tms-matrix) thead { display: none; }
+  table.tms-table:not(.tms-matrix),
+  table.tms-table:not(.tms-matrix) tbody,
+  table.tms-table:not(.tms-matrix) tr,
+  table.tms-table:not(.tms-matrix) td { display: block; width: 100%; }
+  table.tms-table:not(.tms-matrix) tr {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    padding: 4px 12px;
+    background: var(--card);
+  }
+  table.tms-table:not(.tms-matrix) tr:last-child { margin-bottom: 0; }
+  table.tms-table:not(.tms-matrix) td {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    text-align: right;
+    border-bottom: 1px dashed var(--border);
+    padding: 8px 0;
+  }
+  table.tms-table:not(.tms-matrix) td:last-child { border-bottom: none; }
+  table.tms-table:not(.tms-matrix) td[data-label]:not([data-label=""])::before {
+    content: attr(data-label);
+    font-size: 10.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    color: var(--text-soft);
+    text-align: left;
+    margin-right: auto;
+    flex-shrink: 0;
+  }
+  table.tms-table:not(.tms-matrix) .tms-empty { text-align: center !important; justify-content: center !important; padding: 20px !important; }
+
+  /* fee matrix: keep as a real (horizontally scrollable) table, just compact it */
+  .tms-matrix { font-size: 11px; }
+  .tms-matrix th, .tms-matrix td { padding: 6px 5px; }
+  .tms-cell-badge { min-width: 40px; padding: 5px 4px; font-size: 10px; }
+  .tms-sticky-col { box-shadow: 2px 0 5px rgba(0,0,0,0.08); }
 }
